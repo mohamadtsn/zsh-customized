@@ -1,0 +1,10 @@
+# Mirror output directory
+mirror_data/
+*.tar.gz
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+*.bak*
