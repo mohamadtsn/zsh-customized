@@ -76,3 +76,7 @@ Use when the destination host has no network connectivity:
   - `bat` / `batcat` automatic alias detection.
   - `fd` / `fdfind` automatic symlinking and `fzf` command integration.
   - `eza` tree previews for `fzf-tab`.
+- **Automatic Migration from Previous Shells**:
+  - Automatically migrates history from `~/.bash_history`, `~/.sh_history`, etc., converting timestamps to Zsh's extended format with backup and deduplication.
+  - Seamlessly bridges `~/.profile` / `~/.bash_profile` into `~/.zprofile` and `~/.zshrc` with `emulate sh` so all environment variables and PATH additions are retained.
+  - Slices in existing `~/.bash_aliases` automatically.

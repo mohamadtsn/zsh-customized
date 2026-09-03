@@ -3,8 +3,22 @@
 # =============================================================================
 
 # ── Environment & PATH ────────────────────────────────────────────────────────
+typeset -U PATH path
 export PATH="$HOME/.local/bin:$HOME/bin:/usr/local/bin:$PATH"
 export ZSH="$HOME/.oh-my-zsh"
+
+# ── Legacy Shell Compatibility (.profile & .bash_aliases) ────────────────────
+# Ensure environment variables, PATH, and exports from previous shell are loaded
+if [ -f "$HOME/.profile" ]; then
+  emulate sh -c 'source "$HOME/.profile"'
+elif [ -f "$HOME/.bash_profile" ]; then
+  emulate sh -c 'source "$HOME/.bash_profile"'
+fi
+
+# Source custom aliases from previous bash configuration if present
+if [ -f "$HOME/.bash_aliases" ]; then
+  source "$HOME/.bash_aliases"
+fi
 
 # ── Prompt Setup (Starship or fallback to OMZ Theme) ──────────────────────────
 if command -v starship &>/dev/null; then
