@@ -182,8 +182,9 @@ fi
 step "6. Setting Zsh as Default Shell"
 ZSH_BIN="$(command -v zsh || true)"
 if [ -n "$ZSH_BIN" ] && [ "$SHELL" != "$ZSH_BIN" ]; then
+  CURRENT_USER="${USER:-$(id -un)}"
   if command -v sudo &>/dev/null && [ "$EUID" -ne 0 ]; then
-    sudo chsh -s "$ZSH_BIN" "$USER" 2>/dev/null || chsh -s "$ZSH_BIN" || true
+    sudo chsh -s "$ZSH_BIN" "$CURRENT_USER" 2>/dev/null || chsh -s "$ZSH_BIN" || true
   else
     chsh -s "$ZSH_BIN" 2>/dev/null || true
   fi
