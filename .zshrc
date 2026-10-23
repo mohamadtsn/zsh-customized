@@ -75,6 +75,8 @@ fi
 # ── Completion Styling (fzf-tab) ──────────────────────────────────────────────
 if command -v eza &>/dev/null; then
   zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza --tree --color=always $realpath 2>/dev/null | head -40'
+elif command -v exa &>/dev/null; then
+  zstyle ':fzf-tab:complete:cd:*' fzf-preview 'exa --tree --color=always $realpath 2>/dev/null | head -40'
 else
   zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls -la $realpath 2>/dev/null | head -40'
 fi
@@ -95,9 +97,16 @@ if command -v eza &>/dev/null; then
   alias ls='eza --icons --group-directories-first'
   alias ll='eza -lah --icons --group-directories-first --git'
   alias lt='eza --tree --icons --level=2'
+  alias la='eza -a --icons'
+elif command -v exa &>/dev/null; then
+  alias ls='exa --icons --group-directories-first'
+  alias ll='exa -lah --icons --group-directories-first --git'
+  alias lt='exa --tree --icons --level=2'
+  alias la='exa -a --icons'
 else
   alias ls='ls --color=auto'
   alias ll='ls -la'
+  alias la='ls -A'
 fi
 
 if command -v batcat &>/dev/null; then
@@ -107,13 +116,51 @@ elif command -v bat &>/dev/null; then
 fi
 
 alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'
+alias cd..='cd ..'
 alias mkdir='mkdir -p'
+alias cp='cp -i'
+alias mv='mv -i'
 alias rm='rm -i'
 alias df='df -h'
 alias free='free -h'
+alias cls='clear'
+alias reload='source ~/.zshrc'
+alias path='echo -e ${PATH//:/\\n}'
+
+# ── Aliases — System & Monitoring ────────────────────────────────────────────
+alias pscpu='ps auxf | sort -nr -k 3 | head -10'
+alias psmem='ps auxf | sort -nr -k 4 | head -10'
+alias ports='sudo ss -tulanp'
+alias myip='curl -fsSL ifconfig.me 2>/dev/null || curl -fsSL ipinfo.io/ip 2>/dev/null'
+alias ping='ping -c 5'
+alias untar='tar -zxvf'
+alias mktar='tar -zcvf'
+
+# ── Aliases — Git ────────────────────────────────────────────────────────────
+alias g='git'
+alias gs='git status -sb'
+alias ga='git add'
+alias gc='git commit -m'
+alias gcm='git commit -m'
+alias gca='git commit --amend'
+alias gcan='git commit --amend --no-edit'
+alias gcl='git clone'
+alias gp='git push'
+alias gl='git log --oneline --graph --decorate -15'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+alias gsw='git switch'
+alias gswc='git switch -c'
+alias gsta='git stash push'
+alias gstp='git stash pop'
+alias gstl='git stash list'
+alias gundo='git reset --soft HEAD~1'
 
 # ── Aliases — Docker ─────────────────────────────────────────────────────────
 alias dk='docker'
@@ -122,6 +169,10 @@ alias dkps='docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
 alias dkpsa='docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"'
 alias dklogs='docker logs -f'
 alias dkexec='docker exec -it'
+alias dkstop='docker stop $(docker ps -q)'
+alias dkclean='docker system prune -f'
+alias dkcleanall='docker system prune -af --volumes'
+alias dkstats='docker stats --no-stream'
 
 # ── Aliases — Laravel / PHP ──────────────────────────────────────────────────
 alias art='php artisan'
