@@ -10,6 +10,7 @@ ok()   { echo -e "${GREEN}✔ $1${RESET}"; }
 warn() { echo -e "${YELLOW}⚠ $1${RESET}"; }
 err()  { echo -e "${RED}✖ $1${RESET}"; }
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUT_DIR="mirror_data"
 
 while [[ $# -gt 0 ]]; do
@@ -55,8 +56,18 @@ fi
 curl -fsSL https://starship.rs/install.sh -o "$OUT_DIR/starship-install.sh"
 ok "Saved $OUT_DIR/starship-install.sh"
 
-# 2. Download Oh My Zsh
-step "2. Archiving Oh My Zsh Core"
+# 2. Download eza (for offline use on distributions without eza in apt, e.g. Ubuntu 22.04)
+step "2. Downloading eza Assets"
+EZA_URL="https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz"
+echo "Fetching eza binary from $EZA_URL ..."
+if curl -fsSL "$EZA_URL" -o "$OUT_DIR/eza.tar.gz"; then
+  ok "Saved $OUT_DIR/eza.tar.gz"
+else
+  warn "Failed to download eza binary (optional offline asset)."
+fi
+
+# 3. Download Oh My Zsh
+step "3. Archiving Oh My Zsh Core"
 OMZ_INSTALL_URL="https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
 curl -fsSL "$OMZ_INSTALL_URL" -o "$OUT_DIR/omz-install.sh"
 ok "Saved $OUT_DIR/omz-install.sh"
@@ -68,8 +79,8 @@ tar -czf "$OUT_DIR/ohmyzsh.tar.gz" -C "$TEMP_BUILD_DIR" .oh-my-zsh 2>/dev/null |
   ( mv "$OMZ_TEMP" "$TEMP_BUILD_DIR/.oh-my-zsh" && tar -czf "$OUT_DIR/ohmyzsh.tar.gz" -C "$TEMP_BUILD_DIR" .oh-my-zsh )
 ok "Saved $OUT_DIR/ohmyzsh.tar.gz"
 
-# 3. Download OMZ Custom Plugins
-step "3. Archiving Custom OMZ Plugins"
+# 4. Download OMZ Custom Plugins
+step "4. Archiving Custom OMZ Plugins"
 plugins=(
   "zsh-autosuggestions|https://github.com/zsh-users/zsh-autosuggestions.git"
   "zsh-syntax-highlighting|https://github.com/zsh-users/zsh-syntax-highlighting.git"
@@ -86,16 +97,32 @@ for item in "${plugins[@]}"; do
   ok "Saved $OUT_DIR/plugins/$p_name.tar.gz"
 done
 
+# 5. Copy Setup Script & .zshrc Config for Clone-Free Mirror/Offline Install
+step "5. Bundling Setup Script & .zshrc Config"
+if [ -f "$SCRIPT_DIR/.zshrc" ]; then
+  cp "$SCRIPT_DIR/.zshrc" "$OUT_DIR/.zshrc"
+  ok "Saved $OUT_DIR/.zshrc"
+else
+  err "Missing $SCRIPT_DIR/.zshrc"
+  exit 1
+fi
+
+if [ -f "$SCRIPT_DIR/zsh-setup.sh" ]; then
+  cp "$SCRIPT_DIR/zsh-setup.sh" "$OUT_DIR/zsh-setup.sh"
+  chmod +x "$OUT_DIR/zsh-setup.sh"
+  ok "Saved $OUT_DIR/zsh-setup.sh"
+fi
+
 step "Mirror Data Created Successfully!"
 echo -e "${GREEN}${BOLD}Output directory:${RESET} $(realpath "$OUT_DIR")"
 echo ""
 echo -e "${BOLD}Usage Scenarios:${RESET}"
 echo "1. Offline Server (Local Directory Copy):"
-echo "   Transfer this repository + '$OUT_DIR' folder to the target server, then run:"
-echo -e "   ${CYAN}./zsh-setup.sh --offline-dir ./$OUT_DIR${RESET}"
+echo "   Transfer '$OUT_DIR' folder to the target server, then run:"
+echo -e "   ${CYAN}$OUT_DIR/zsh-setup.sh --offline-dir ./$OUT_DIR${RESET}"
 echo ""
-echo "2. HTTP Mirror Server:"
+echo "2. HTTP Mirror Server (Direct One-Liner without Cloning):"
 echo "   Serve '$OUT_DIR' via HTTP (e.g. using python, nginx, or caddy):"
 echo -e "   ${CYAN}python3 -m http.server 8080 -d ./$OUT_DIR${RESET}"
 echo "   Then on the restricted target server, run:"
-echo -e "   ${CYAN}./zsh-setup.sh --mirror http://<MIRROR_HOST>:8080${RESET}"
+echo -e "   ${CYAN}curl -fsSL http://<MIRROR_HOST>:8080/zsh-setup.sh | bash -s -- --mirror http://<MIRROR_HOST>:8080${RESET}"

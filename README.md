@@ -15,10 +15,18 @@ A lightweight, shell setup script and `.zshrc` configuration for **Oh My Zsh** a
 
 ### 1. Direct Online Installation
 
-Use when the target machine has direct internet access:
+Use when the target machine has direct internet access.
+
+#### Option A: Direct One-Liner (No Clone Required)
 
 ```bash
-git clone https://github.com/your-username/zsh-customized.git
+curl -fsSL https://raw.githubusercontent.com/mohamadtsn/zsh-customized/main/zsh-setup.sh | bash
+```
+
+#### Option B: Clone Repository
+
+```bash
+git clone https://github.com/mohamadtsn/zsh-customized.git
 cd zsh-customized
 chmod +x zsh-setup.sh download-mirror.sh
 ./zsh-setup.sh
@@ -36,7 +44,7 @@ Use when the destination server cannot reach GitHub or starship.rs directly, but
 ./download-mirror.sh --output mirror_data
 ```
 
-This archives Starship binaries, Oh My Zsh core, and all 4 custom plugins into `./mirror_data`.
+This archives Starship binaries, Oh My Zsh core, all 4 custom plugins, `zsh-setup.sh`, and `.zshrc` into `./mirror_data`.
 
 #### Step 2: Serve `mirror_data` via HTTP
 
@@ -47,6 +55,14 @@ python3 -m http.server 8080 -d ./mirror_data
 ```
 
 #### Step 3: Run setup on the target machine
+
+Run directly via one-liner without cloning:
+
+```bash
+curl -fsSL http://<MIRROR_HOST>:8080/zsh-setup.sh | bash -s -- --mirror http://<MIRROR_HOST>:8080
+```
+
+Or if you already have the repository on the target machine:
 
 ```bash
 ./zsh-setup.sh --mirror http://<MIRROR_HOST>:8080
